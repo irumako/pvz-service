@@ -1,0 +1,10 @@
+DROP TABLE IF EXISTS product;
+DROP TABLE IF EXISTS goods_reception;
+DROP TABLE IF EXISTS pvz;
+DROP TABLE IF EXISTS users;
+
+DROP TYPE IF EXISTS reception_status;
+DROP TYPE IF EXISTS product_type;
+DROP TYPE IF EXISTS user_role;
+
+DROP EXTENSION IF EXISTS "uuid-ossp";
