@@ -7,6 +7,7 @@ import (
 	"pvz-service/config"
 	v1 "pvz-service/internal/controller/http"
 	"pvz-service/pkg/httpserver"
+	"pvz-service/pkg/jwt"
 	"pvz-service/pkg/logger"
 	"pvz-service/pkg/postgres"
 	"syscall"
@@ -15,6 +16,8 @@ import (
 
 func Run(cfg *config.Config) {
 	l := logger.New(cfg.Log.Level)
+
+	jwt := jwt.New(cfg.Jwt.Secret, time.Duration(cfg.Expiration)*time.Hour)
 
 	pg, err := postgres.New(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))
 	if err != nil {
@@ -31,7 +34,7 @@ func Run(cfg *config.Config) {
 	)
 
 	uc := v1.Usecases{}
-	v1.SetRouters(httpServer.Router, l, uc)
+	v1.SetRouters(httpServer.Router, l, jwt, uc)
 
 	httpServer.Start()
 

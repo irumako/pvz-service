@@ -3,6 +3,8 @@ package v1
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"pvz-service/internal/controller/http/middleware"
+	"pvz-service/internal/entity"
 	"pvz-service/internal/usecase"
 	"pvz-service/pkg/logger"
 )
@@ -17,7 +19,7 @@ func NewReceptionRoutes(apiV1 *gin.RouterGroup, u usecase.Reception, l logger.In
 
 	routes := apiV1.Group("/receptions")
 	{
-		routes.POST("/", r.create)
+		routes.POST("/", middleware.Role(entity.Employee), r.create)
 	}
 }
 

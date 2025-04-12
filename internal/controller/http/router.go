@@ -6,6 +6,7 @@ import (
 	"pvz-service/internal/controller/http/middleware"
 	v1 "pvz-service/internal/controller/http/v1"
 	"pvz-service/internal/usecase"
+	"pvz-service/pkg/jwt"
 	"pvz-service/pkg/logger"
 )
 
@@ -19,6 +20,7 @@ type Usecases struct {
 func SetRouters(
 	r *gin.Engine,
 	l logger.Interface,
+	jwt *jwt.Jwt,
 	uc Usecases,
 ) {
 	r.Use(gin.Recovery())
@@ -29,11 +31,10 @@ func SetRouters(
 	})
 
 	routes := r.Group("/api/v1")
-	//v1.NewUserRoutes(routes, uc.GetUserNameList)
-	//routes.Use(middleware.BasicAuthMiddleware(uc.GetUser))
+	v1.NewUserRoutes(routes, uc.UserUC, l, jwt)
+	routes.Use(middleware.Auth(jwt))
 	{
 		v1.NewPvzRoutes(routes, uc.PvzUC, l)
-		v1.NewUserRoutes(routes, uc.UserUC, l)
 		v1.NewReceptionRoutes(routes, uc.ReceptionUC, l)
 		v1.NewProductRoutes(routes, uc.ProductUC, l)
 	}

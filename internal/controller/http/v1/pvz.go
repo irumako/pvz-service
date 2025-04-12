@@ -3,6 +3,8 @@ package v1
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"pvz-service/internal/controller/http/middleware"
+	"pvz-service/internal/entity"
 	"pvz-service/internal/usecase"
 	"pvz-service/pkg/logger"
 )
@@ -19,9 +21,9 @@ func NewPvzRoutes(apiV1 *gin.RouterGroup, u usecase.Pvz, l logger.Interface) {
 	{
 		routes.GET("/", r.getFilterList)
 
-		routes.POST("/", r.create)
+		routes.POST("/", middleware.Role(entity.Moderator), r.create)
 		routes.POST("/:id/close_last_reception", r.closeLastReception)
-		routes.POST("/:id/delete_last_product", r.deleteLastProduct)
+		routes.POST("/:id/delete_last_product", middleware.Role(entity.Employee), r.deleteLastProduct)
 	}
 }
 
