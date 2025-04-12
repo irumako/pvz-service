@@ -29,7 +29,7 @@ func New(key string, expiration time.Duration) *Jwt {
 
 func (j *Jwt) GenerateToken(userID, email, role string) (string, error) {
 	now := time.Now()
-	claims := &CustomClaims{
+	claims := CustomClaims{
 		UserID: userID,
 		Email:  email,
 		Role:   role,
