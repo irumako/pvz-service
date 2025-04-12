@@ -37,7 +37,8 @@ type (
 	}
 
 	Jwt struct {
-		Secret string `env:"JWT_SECRET" envDefault:""`
+		Secret     string `env:"JWT_SECRET" envDefault:""`
+		Expiration int    `env:"JWT_EXPIRATION_HOURS" envDefault:"24"`
 	}
 )
 

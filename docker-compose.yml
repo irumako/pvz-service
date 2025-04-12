@@ -21,6 +21,9 @@ x-backend-app-environment: &x-backend-app-environment
   # PG
   PG_POOL_MAX: "25"
   PG_URL: "postgres://user:postgrespasswd@db:5432/db"
+  # JWT
+  JWT_SECRET: "ac05cbc147130f7eeeccc8439c74c63c1d7bba61f394450101cf73ec11af1a55a76c985256406b59126e61a16e43efa6740389000a412f37e1e3a7b868cbcbe049a25d47bffe0e6adb711cbce5ef8a52fd5996ed34b07d8d2ab34f3fbaf90671b57acbc99855c5429b5c29e602f3050a33b252e33f70b01a90f2a54cfba99af84edbfa8480932411dbb7ab5186861b7af1d0fa9042e3261dcd3b806a8cc792b4ebb78ded36305e9cb99ad9762d4999e52f0237022164fbfb06a8666aef8c75f52dadfe30717b4d504bf25b1b8706862aa14f8ccdd5918fba2a8cea7e25fedf2d3e58e537f5e658aaaa264d24ab37a3240ecf37e1dc351ff80d04f7b1ab570adc"
+  JWT_EXPIRATION_HOURS: "24"
 
 services:
   db:
