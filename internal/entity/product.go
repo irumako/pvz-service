@@ -12,6 +12,32 @@ const (
 	Footwear   ProductType = "обувь"
 )
 
+func ToDBProductType(pt ProductType) string {
+	switch pt {
+	case Electronic:
+		return "electronics"
+	case Clothing:
+		return "clothes"
+	case Footwear:
+		return "shoes"
+	default:
+		return ""
+	}
+}
+
+func FromDBProductType(s string) ProductType {
+	switch s {
+	case "electronics":
+		return Electronic
+	case "clothes":
+		return Clothing
+	case "shoes":
+		return Footwear
+	default:
+		return ""
+	}
+}
+
 type Product struct {
 	ID          string      `json:"id" db:"id"`
 	Datetime    time.Time   `json:"dateTime" db:"datetime"`
