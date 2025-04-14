@@ -13,8 +13,8 @@ import (
 type Usecases struct {
 	PvzUC       usecase.Pvz
 	ReceptionUC usecase.Reception
-	UserUC      usecase.User
 	ProductUC   usecase.Product
+	UserUC      usecase.User
 }
 
 func SetRouters(
@@ -34,7 +34,7 @@ func SetRouters(
 	v1.NewUserRoutes(routes, uc.UserUC, l, jwt)
 	routes.Use(middleware.Auth(jwt))
 	{
-		v1.NewPvzRoutes(routes, uc.PvzUC, l)
+		v1.NewPvzRoutes(routes, uc.PvzUC, uc.ReceptionUC, uc.ProductUC, l)
 		v1.NewReceptionRoutes(routes, uc.ReceptionUC, l)
 		v1.NewProductRoutes(routes, uc.ProductUC, l)
 	}

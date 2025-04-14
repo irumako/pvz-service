@@ -35,7 +35,7 @@ func Role(allowedRoles ...entity.UserRole) gin.HandlerFunc {
 
 		if !allowed {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
-				"message": "Недостаточно прав",
+				"message": "Доступ запрещен",
 			})
 			return
 		}

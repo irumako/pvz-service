@@ -2,10 +2,16 @@ package app
 
 import (
 	"fmt"
+	trmpgx "github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 	"os"
 	"os/signal"
 	"pvz-service/config"
 	v1 "pvz-service/internal/controller/http"
+	repo "pvz-service/internal/repo/postgres"
+	"pvz-service/internal/usecase/product"
+	"pvz-service/internal/usecase/pvz"
+	"pvz-service/internal/usecase/reception"
 	"pvz-service/pkg/httpserver"
 	"pvz-service/pkg/jwt"
 	"pvz-service/pkg/logger"
@@ -17,7 +23,7 @@ import (
 func Run(cfg *config.Config) {
 	l := logger.New(cfg.Log.Level)
 
-	jwt := jwt.New(cfg.Jwt.Secret, time.Duration(cfg.Expiration)*time.Hour)
+	jwtUtils := jwt.New(cfg.Jwt.Secret, time.Duration(cfg.Expiration)*time.Hour)
 
 	pg, err := postgres.New(cfg.PG.URL, postgres.MaxPoolSize(cfg.PG.PoolMax))
 	if err != nil {
@@ -33,8 +39,21 @@ func Run(cfg *config.Config) {
 		httpserver.ShutdownTimeout(time.Duration(cfg.App.ShutdownTimeout)*time.Second),
 	)
 
-	uc := v1.Usecases{}
-	v1.SetRouters(httpServer.Router, l, jwt, uc)
+	// transaction manager
+	trManager := manager.Must(trmpgx.NewDefaultFactory(pg.Pool))
+
+	// Repository
+	pvzRepo := repo.NewPvzRepo(pg, trmpgx.DefaultCtxGetter)
+	receptionRepo := repo.NewReceptionRepo(pg, trmpgx.DefaultCtxGetter)
+	productRepo := repo.NewProductRepo(pg, trmpgx.DefaultCtxGetter)
+
+	//Use-cases
+	uc := v1.Usecases{
+		PvzUC:       pvz.New(pvzRepo),
+		ReceptionUC: reception.New(receptionRepo, trManager),
+		ProductUC:   product.New(productRepo, receptionRepo, trManager),
+	}
+	v1.SetRouters(httpServer.Router, l, jwtUtils, uc)
 
 	httpServer.Start()
 
