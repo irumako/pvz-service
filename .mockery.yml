@@ -1,0 +1,18 @@
+all: false
+dir: 'internal/usecase'
+filename: mocks_test.go
+force-file-write: false
+formatter: goimports
+log-level: info
+structname: '{{.Mock}}{{.InterfaceName}}'
+pkgname: 'usecase'
+recursive: false
+require-template-schema-exists: true
+template: testify
+template-schema: '{{.Template}}.schema.json'
+packages:
+  pvz-service/internal/repo:
+    interfaces:
+      PvzRepo:
+      ReceptionRepo:
+      ProductRepo:
