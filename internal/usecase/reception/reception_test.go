@@ -1,24 +1,24 @@
-package usecase
+package reception
 
 import (
 	"context"
+	"github.com/stretchr/testify/require"
+	mocks "pvz-service/internal/repo"
 	"pvz-service/internal/repo/postgres"
-	"pvz-service/internal/usecase/reception"
+	"pvz-service/internal/usecase"
 	"testing"
 	"time"
-
-	"github.com/stretchr/testify/require"
 
 	"pvz-service/internal/entity"
 )
 
-func receptionUseCase(t *testing.T) (*reception.UseCase, *MockReceptionRepo) {
+func receptionUseCase(t *testing.T) (*UseCase, *mocks.MockReceptionRepo) {
 	t.Helper()
 
-	repo := NewMockReceptionRepo(t)
-	fakeManager := &FakeManager{}
+	repo := mocks.NewMockReceptionRepo(t)
+	fakeManager := &usecase.FakeManager{}
 
-	uc := reception.New(repo, fakeManager)
+	uc := New(repo, fakeManager)
 	return uc, repo
 }
 
@@ -32,13 +32,13 @@ func TestReceptionUseCase_Create(t *testing.T) {
 
 	tests := []struct {
 		name string
-		mock func(repo *MockReceptionRepo)
+		mock func(repo *mocks.MockReceptionRepo)
 		res  *entity.Reception
 		err  error
 	}{
 		{
 			name: "Успешное создание приемки",
-			mock: func(repo *MockReceptionRepo) {
+			mock: func(repo *mocks.MockReceptionRepo) {
 				receptionFake := &entity.Reception{
 					ID:       "uuid4",
 					PvzID:    pvzId,
@@ -57,7 +57,7 @@ func TestReceptionUseCase_Create(t *testing.T) {
 		},
 		{
 			name: "Невозможно создать приемку (уже есть открытая)",
-			mock: func(repo *MockReceptionRepo) {
+			mock: func(repo *mocks.MockReceptionRepo) {
 				repo.EXPECT().Create(ctx, pvzId).Return(nil, postgres.ErrDuplicateKey)
 			},
 			res: nil,
@@ -65,7 +65,7 @@ func TestReceptionUseCase_Create(t *testing.T) {
 		},
 		{
 			name: "Ошибка в репо при создании приемки",
-			mock: func(repo *MockReceptionRepo) {
+			mock: func(repo *mocks.MockReceptionRepo) {
 				repo.EXPECT().Create(ctx, pvzId).Return(nil, entity.ErrInternalServErr)
 			},
 			res: nil,
@@ -100,13 +100,13 @@ func TestReceptionUseCase_GetByPvzId(t *testing.T) {
 
 	tests := []struct {
 		name string
-		mock func(repo *MockReceptionRepo)
+		mock func(repo *mocks.MockReceptionRepo)
 		res  []entity.Reception
 		err  error
 	}{
 		{
 			name: "Успешное получение приемок",
-			mock: func(repo *MockReceptionRepo) {
+			mock: func(repo *mocks.MockReceptionRepo) {
 				receptionsExpected := []entity.Reception{
 					{ID: "rec1", PvzID: pvzId, Datetime: fixedTime, Status: entity.InProgress},
 					{ID: "rec2", PvzID: pvzId, Datetime: fixedTime, Status: entity.Close},
@@ -121,7 +121,7 @@ func TestReceptionUseCase_GetByPvzId(t *testing.T) {
 		},
 		{
 			name: "Ошибка в репо",
-			mock: func(repo *MockReceptionRepo) {
+			mock: func(repo *mocks.MockReceptionRepo) {
 				repo.EXPECT().GetByPvzId(ctx, pvzId).Return(nil, entity.ErrInternalServErr)
 			},
 			res: nil,
@@ -171,13 +171,13 @@ func TestReceptionUseCase_CloseLastOpenOnPvz(t *testing.T) {
 
 	tests := []struct {
 		name string
-		mock func(repo *MockReceptionRepo)
+		mock func(repo *mocks.MockReceptionRepo)
 		res  *entity.Reception
 		err  error
 	}{
 		{
 			name: "Успешное закрытие приёмки",
-			mock: func(repo *MockReceptionRepo) {
+			mock: func(repo *mocks.MockReceptionRepo) {
 				repo.EXPECT().
 					GetByPvzIdWithStatus(ctx, pvzId, entity.InProgress).
 					Return([]entity.Reception{receptionOpen}, nil)
@@ -190,7 +190,7 @@ func TestReceptionUseCase_CloseLastOpenOnPvz(t *testing.T) {
 		},
 		{
 			name: "Открытая приёмка не найдена",
-			mock: func(repo *MockReceptionRepo) {
+			mock: func(repo *mocks.MockReceptionRepo) {
 				repo.EXPECT().
 					GetByPvzIdWithStatus(ctx, pvzId, entity.InProgress).
 					Return([]entity.Reception{}, nil)
@@ -200,7 +200,7 @@ func TestReceptionUseCase_CloseLastOpenOnPvz(t *testing.T) {
 		},
 		{
 			name: "Ошибка обновления статуса",
-			mock: func(repo *MockReceptionRepo) {
+			mock: func(repo *mocks.MockReceptionRepo) {
 				repo.EXPECT().
 					GetByPvzIdWithStatus(ctx, pvzId, entity.InProgress).
 					Return([]entity.Reception{receptionOpen}, nil)

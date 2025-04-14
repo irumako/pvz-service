@@ -1,11 +1,11 @@
 all: false
-dir: 'internal/usecase'
-filename: mocks_test.go
+dir: 'internal/repo'
+filename: mocks_repo.go
 force-file-write: false
 formatter: goimports
 log-level: info
 structname: '{{.Mock}}{{.InterfaceName}}'
-pkgname: 'usecase'
+pkgname: 'repo'
 recursive: false
 require-template-schema-exists: true
 template: testify

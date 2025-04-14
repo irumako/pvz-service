@@ -1,22 +1,23 @@
-package usecase
+package pvz
 
 import (
 	"context"
 	"errors"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"pvz-service/internal/entity"
-	"pvz-service/internal/usecase/pvz"
+	mocks "pvz-service/internal/repo"
 	"testing"
 	"time"
 )
 
 var errInternalServErr = errors.New("internal server error")
 
-func pvzUseCase(t *testing.T) (*pvz.UseCase, *MockPvzRepo) {
+func pvzUseCase(t *testing.T) (*UseCase, *mocks.MockPvzRepo) {
 	t.Helper()
 
-	pvzRepo := NewMockPvzRepo(t)
-	useCase := pvz.New(pvzRepo)
+	pvzRepo := mocks.NewMockPvzRepo(t)
+	useCase := New(pvzRepo)
 
 	return useCase, pvzRepo
 }
@@ -76,7 +77,7 @@ func TestPvzUseCase_Create(t *testing.T) {
 
 			res, err := uc.Create(ctx, localTc.input)
 
-			require.Equal(t, localTc.res, res)
+			assert.Equal(t, localTc.res, res)
 			require.ErrorIs(t, err, localTc.err)
 		})
 	}

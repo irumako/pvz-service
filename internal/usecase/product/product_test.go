@@ -1,23 +1,24 @@
-package usecase
+package product
 
 import (
 	"context"
 	"github.com/stretchr/testify/require"
 	"pvz-service/internal/entity"
+	mocks "pvz-service/internal/repo"
 	"pvz-service/internal/repo/postgres"
-	"pvz-service/internal/usecase/product"
+	"pvz-service/internal/usecase"
 	"testing"
 	"time"
 )
 
-func productUseCase(t *testing.T) (*product.UseCase, *MockProductRepo, *MockReceptionRepo) {
+func productUseCase(t *testing.T) (*UseCase, *mocks.MockProductRepo, *mocks.MockReceptionRepo) {
 	t.Helper()
 
-	productRepo := NewMockProductRepo(t)
-	receptionRepo := NewMockReceptionRepo(t)
-	fakeManager := &FakeManager{}
+	productRepo := mocks.NewMockProductRepo(t)
+	receptionRepo := mocks.NewMockReceptionRepo(t)
+	fakeManager := &usecase.FakeManager{}
 
-	uc := product.New(productRepo, receptionRepo, fakeManager)
+	uc := New(productRepo, receptionRepo, fakeManager)
 	return uc, productRepo, receptionRepo
 }
 
@@ -53,13 +54,13 @@ func TestProductUseCase_GetByReceptionId(t *testing.T) {
 
 	tests := []struct {
 		name string
-		mock func(productRepo *MockProductRepo, recRepo *MockReceptionRepo)
+		mock func(productRepo *mocks.MockProductRepo, recRepo *mocks.MockReceptionRepo)
 		res  []entity.Product
 		err  error
 	}{
 		{
 			name: "Успешное получение товаров",
-			mock: func(productRepo *MockProductRepo, recRepo *MockReceptionRepo) {
+			mock: func(productRepo *mocks.MockProductRepo, recRepo *mocks.MockReceptionRepo) {
 
 				productRepo.EXPECT().GetByReceptionId(ctx, openReception.ID).Return(productsExpected, nil)
 			},
@@ -68,7 +69,7 @@ func TestProductUseCase_GetByReceptionId(t *testing.T) {
 		},
 		{
 			name: "Ошибка в репо",
-			mock: func(productRepo *MockProductRepo, recRepo *MockReceptionRepo) {
+			mock: func(productRepo *mocks.MockProductRepo, recRepo *mocks.MockReceptionRepo) {
 				productRepo.EXPECT().GetByReceptionId(ctx, openReception.ID).Return(nil, entity.ErrInternalServErr)
 			},
 			res: nil,
@@ -110,13 +111,13 @@ func TestProductUseCase_Create(t *testing.T) {
 
 	tests := []struct {
 		name string
-		mock func(productRepo *MockProductRepo, recRepo *MockReceptionRepo)
+		mock func(productRepo *mocks.MockProductRepo, recRepo *mocks.MockReceptionRepo)
 		res  *entity.Product
 		err  error
 	}{
 		{
 			name: "Успешное создание товара",
-			mock: func(productRepo *MockProductRepo, recRepo *MockReceptionRepo) {
+			mock: func(productRepo *mocks.MockProductRepo, recRepo *mocks.MockReceptionRepo) {
 				recRepo.EXPECT().
 					GetByPvzIdWithStatus(ctx, pvzId, entity.InProgress).
 					Return([]entity.Reception{openReception}, nil)
@@ -138,7 +139,7 @@ func TestProductUseCase_Create(t *testing.T) {
 		},
 		{
 			name: "Нет открытой приёмки",
-			mock: func(productRepo *MockProductRepo, recRepo *MockReceptionRepo) {
+			mock: func(productRepo *mocks.MockProductRepo, recRepo *mocks.MockReceptionRepo) {
 				recRepo.EXPECT().
 					GetByPvzIdWithStatus(ctx, pvzId, entity.InProgress).
 					Return([]entity.Reception{}, nil)
@@ -148,7 +149,7 @@ func TestProductUseCase_Create(t *testing.T) {
 		},
 		{
 			name: "Ошибка в репо при создании",
-			mock: func(productRepo *MockProductRepo, recRepo *MockReceptionRepo) {
+			mock: func(productRepo *mocks.MockProductRepo, recRepo *mocks.MockReceptionRepo) {
 				recRepo.EXPECT().
 					GetByPvzIdWithStatus(ctx, pvzId, entity.InProgress).
 					Return([]entity.Reception{openReception}, nil)
@@ -201,12 +202,12 @@ func TestProductUseCase_Delete(t *testing.T) {
 
 	tests := []struct {
 		name string
-		mock func(productRepo *MockProductRepo, recRepo *MockReceptionRepo)
+		mock func(productRepo *mocks.MockProductRepo, recRepo *mocks.MockReceptionRepo)
 		err  error
 	}{
 		{
 			name: "Успешное удаление товара",
-			mock: func(productRepo *MockProductRepo, recRepo *MockReceptionRepo) {
+			mock: func(productRepo *mocks.MockProductRepo, recRepo *mocks.MockReceptionRepo) {
 				recRepo.EXPECT().
 					GetByPvzIdWithStatus(ctx, pvzId, entity.InProgress).
 					Return([]entity.Reception{openReception}, nil)
@@ -223,7 +224,7 @@ func TestProductUseCase_Delete(t *testing.T) {
 		},
 		{
 			name: "Нет открытой приёмки",
-			mock: func(productRepo *MockProductRepo, recRepo *MockReceptionRepo) {
+			mock: func(productRepo *mocks.MockProductRepo, recRepo *mocks.MockReceptionRepo) {
 				recRepo.EXPECT().
 					GetByPvzIdWithStatus(ctx, pvzId, entity.InProgress).
 					Return([]entity.Reception{}, nil)
@@ -232,7 +233,7 @@ func TestProductUseCase_Delete(t *testing.T) {
 		},
 		{
 			name: "Отсутствуют товары",
-			mock: func(productRepo *MockProductRepo, recRepo *MockReceptionRepo) {
+			mock: func(productRepo *mocks.MockProductRepo, recRepo *mocks.MockReceptionRepo) {
 				recRepo.EXPECT().
 					GetByPvzIdWithStatus(ctx, pvzId, entity.InProgress).
 					Return([]entity.Reception{openReception}, nil)
