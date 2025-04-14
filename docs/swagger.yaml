@@ -15,12 +15,18 @@ components:
         id:
           type: string
           format: uuid
+          x-oapi-codegen-extra-tags:
+            binding: "required"
         email:
           type: string
           format: email
+          x-oapi-codegen-extra-tags:
+            binding: "required"
         role:
           type: string
           enum: [employee, moderator]
+          x-oapi-codegen-extra-tags:
+            binding: "required"
       required: [email, role]
 
     PVZ:
@@ -29,9 +35,13 @@ components:
         id:
           type: string
           format: uuid
+          x-oapi-codegen-extra-tags:
+            binding: "required"
         registrationDate:
           type: string
           format: date-time
+          x-oapi-codegen-extra-tags:
+            binding: "required"
         city:
           type: string
           enum: [Москва, Санкт-Петербург, Казань]
@@ -39,6 +49,8 @@ components:
             - "Moscow"
             - "SaintPetersburg"
             - "Kazan"
+          x-oapi-codegen-extra-tags:
+            binding: "required"
       required: [city]
 
     Reception:
@@ -47,16 +59,25 @@ components:
         id:
           type: string
           format: uuid
+          x-oapi-codegen-extra-tags:
+            binding: "required"
         dateTime:
           type: string
           format: date-time
+          x-oapi-codegen-extra-tags:
+            binding: "required"
         pvzId:
           type: string
           format: uuid
+          x-oapi-codegen-extra-tags:
+            binding: "required"
         status:
           type: string
           enum: [in_progress, close]
+          x-oapi-codegen-extra-tags:
+            binding: "required"
       required: [dateTime, pvzId, status]
+      x-oapi-codegen-extra-tags: 'binding:"required"'
 
     Product:
       type: object
@@ -64,9 +85,13 @@ components:
         id:
           type: string
           format: uuid
+          x-oapi-codegen-extra-tags:
+            binding: "required"
         dateTime:
           type: string
           format: date-time
+          x-oapi-codegen-extra-tags:
+            binding: "required"
         type:
           type: string
           enum: [электроника, одежда, обувь]
@@ -74,9 +99,13 @@ components:
             - "electronics"
             - "clothes"
             - "shoes"
+          x-oapi-codegen-extra-tags:
+            binding: "required"
         receptionId:
           type: string
           format: uuid
+          x-oapi-codegen-extra-tags:
+            binding: "required"
       required: [type, receptionId]
 
     Error:
@@ -106,6 +135,8 @@ paths:
                 role:
                   type: string
                   enum: [employee, moderator]
+                  x-oapi-codegen-extra-tags:
+                    binding: "required"
               required: [role]
       responses:
         '200':
@@ -134,11 +165,17 @@ paths:
                 email:
                   type: string
                   format: email
+                  x-oapi-codegen-extra-tags:
+                    binding: "required"
                 password:
                   type: string
+                  x-oapi-codegen-extra-tags:
+                    binding: "required"
                 role:
                   type: string
                   enum: [employee, moderator]
+                  x-oapi-codegen-extra-tags:
+                    binding: "required"
               required: [email, password, role]
       responses:
         '201':
@@ -167,8 +204,12 @@ paths:
                 email:
                   type: string
                   format: email
+                  x-oapi-codegen-extra-tags:
+                    binding: "required"
                 password:
                   type: string
+                  x-oapi-codegen-extra-tags:
+                    binding: "required"
               required: [email, password]
       responses:
         '200':
@@ -351,6 +392,8 @@ paths:
                 pvzId:
                   type: string
                   format: uuid
+                  x-oapi-codegen-extra-tags:
+                    binding: "required"
               required: [pvzId]
       responses:
         '201':
@@ -391,9 +434,13 @@ paths:
                     - "electronics"
                     - "clothes"
                     - "shoes"
+                  x-oapi-codegen-extra-tags:
+                    binding: "required"
                 pvzId:
                   type: string
                   format: uuid
+                  x-oapi-codegen-extra-tags:
+                    binding: "required"
               required: [type, pvzId]
       responses:
         '201':
