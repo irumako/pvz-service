@@ -65,9 +65,9 @@ type Error struct {
 
 // PVZ defines model for PVZ.
 type PVZ struct {
-	City             PVZCity             `json:"city"`
-	Id               *openapi_types.UUID `json:"id,omitempty"`
-	RegistrationDate *time.Time          `json:"registrationDate,omitempty"`
+	City             PVZCity             `binding:"required" json:"city"`
+	Id               *openapi_types.UUID `binding:"required" json:"id,omitempty"`
+	RegistrationDate *time.Time          `binding:"required" json:"registrationDate,omitempty"`
 }
 
 // PVZCity defines model for PVZ.City.
@@ -75,10 +75,10 @@ type PVZCity string
 
 // Product defines model for Product.
 type Product struct {
-	DateTime    *time.Time          `json:"dateTime,omitempty"`
-	Id          *openapi_types.UUID `json:"id,omitempty"`
-	ReceptionId openapi_types.UUID  `json:"receptionId"`
-	Type        ProductType         `json:"type"`
+	DateTime    *time.Time          `binding:"required" json:"dateTime,omitempty"`
+	Id          *openapi_types.UUID `binding:"required" json:"id,omitempty"`
+	ReceptionId openapi_types.UUID  `binding:"required" json:"receptionId"`
+	Type        ProductType         `binding:"required" json:"type"`
 }
 
 // ProductType defines model for Product.Type.
@@ -86,10 +86,10 @@ type ProductType string
 
 // Reception defines model for Reception.
 type Reception struct {
-	DateTime time.Time           `json:"dateTime"`
-	Id       *openapi_types.UUID `json:"id,omitempty"`
-	PvzId    openapi_types.UUID  `json:"pvzId"`
-	Status   ReceptionStatus     `json:"status"`
+	DateTime time.Time           `binding:"required" json:"dateTime"`
+	Id       *openapi_types.UUID `binding:"required" json:"id,omitempty"`
+	PvzId    openapi_types.UUID  `binding:"required" json:"pvzId"`
+	Status   ReceptionStatus     `binding:"required" json:"status"`
 }
 
 // ReceptionStatus defines model for Reception.Status.
@@ -100,9 +100,9 @@ type Token = string
 
 // User defines model for User.
 type User struct {
-	Email openapi_types.Email `json:"email"`
-	Id    *openapi_types.UUID `json:"id,omitempty"`
-	Role  UserRole            `json:"role"`
+	Email openapi_types.Email `binding:"required" json:"email"`
+	Id    *openapi_types.UUID `binding:"required" json:"id,omitempty"`
+	Role  UserRole            `binding:"required" json:"role"`
 }
 
 // UserRole defines model for User.Role.
@@ -110,7 +110,7 @@ type UserRole string
 
 // PostDummyLoginJSONBody defines parameters for PostDummyLogin.
 type PostDummyLoginJSONBody struct {
-	Role PostDummyLoginJSONBodyRole `json:"role"`
+	Role PostDummyLoginJSONBodyRole `binding:"required" json:"role"`
 }
 
 // PostDummyLoginJSONBodyRole defines parameters for PostDummyLogin.
@@ -118,14 +118,14 @@ type PostDummyLoginJSONBodyRole string
 
 // PostLoginJSONBody defines parameters for PostLogin.
 type PostLoginJSONBody struct {
-	Email    openapi_types.Email `json:"email"`
-	Password string              `json:"password"`
+	Email    openapi_types.Email `binding:"required" json:"email"`
+	Password string              `binding:"required" json:"password"`
 }
 
 // PostProductsJSONBody defines parameters for PostProducts.
 type PostProductsJSONBody struct {
-	PvzId openapi_types.UUID       `json:"pvzId"`
-	Type  PostProductsJSONBodyType `json:"type"`
+	PvzId openapi_types.UUID       `binding:"required" json:"pvzId"`
+	Type  PostProductsJSONBodyType `binding:"required" json:"type"`
 }
 
 // PostProductsJSONBodyType defines parameters for PostProducts.
@@ -148,14 +148,14 @@ type GetPvzParams struct {
 
 // PostReceptionsJSONBody defines parameters for PostReceptions.
 type PostReceptionsJSONBody struct {
-	PvzId openapi_types.UUID `json:"pvzId"`
+	PvzId openapi_types.UUID `binding:"required" json:"pvzId"`
 }
 
 // PostRegisterJSONBody defines parameters for PostRegister.
 type PostRegisterJSONBody struct {
-	Email    openapi_types.Email      `json:"email"`
-	Password string                   `json:"password"`
-	Role     PostRegisterJSONBodyRole `json:"role"`
+	Email    openapi_types.Email      `binding:"required" json:"email"`
+	Password string                   `binding:"required" json:"password"`
+	Role     PostRegisterJSONBodyRole `binding:"required" json:"role"`
 }
 
 // PostRegisterJSONBodyRole defines parameters for PostRegister.
