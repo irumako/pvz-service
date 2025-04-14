@@ -55,15 +55,21 @@ func (r *PvzRepo) GetByReceptionDate(
 ) ([]entity.Pvz, error) {
 	conn := r.getter.DefaultTrOrDB(ctx, r.db.Pool)
 	builder := r.db.Builder.
-		Select("pvz.id", "pvz.registration_date", "pvz.city").
-		From("pvz").
-		Join("reception r ON pvz.id = r.pvz_id")
+		Select("DISTINCT pvz.id", "pvz.registration_date", "pvz.city").
+		From("pvz")
 
-	if startDate != nil {
-		builder = builder.Where("r.reception_datetime >= ?", *startDate)
-	}
-	if endDate != nil {
-		builder = builder.Where("r.reception_datetime <= ?", *endDate)
+	if startDate != nil || endDate != nil {
+		builder = builder.
+			Join("reception r ON pvz.id = r.pvz_id")
+		if startDate != nil {
+			builder = builder.Where("r.datetime >= ?", *startDate)
+		}
+		if endDate != nil {
+			builder = builder.Where("r.datetime <= ?", *endDate)
+		}
+	} else {
+		builder = builder.
+			LeftJoin("reception r ON pvz.id = r.pvz_id")
 	}
 
 	builder = builder.
@@ -87,7 +93,7 @@ func (r *PvzRepo) GetByReceptionDate(
 	for rows.Next() {
 		p := entity.Pvz{}
 
-		err = rows.Scan(&p.ID, &p.City, &p.RegistrationDate)
+		err = rows.Scan(&p.ID, &p.RegistrationDate, &p.City)
 		if err != nil {
 			return nil, fmt.Errorf("PvzRepo - GetByReceptionDate - rows.Scan: %w", err)
 		}

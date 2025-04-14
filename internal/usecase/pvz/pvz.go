@@ -32,7 +32,7 @@ func (uc *UseCase) ListByReceptionDate(
 	startDate, endDate *time.Time,
 	page, limit int,
 ) ([]entity.Pvz, error) {
-	pvzList, err := uc.pvzRepo.GetByReceptionDate(ctx, startDate, endDate, limit, page*limit)
+	pvzList, err := uc.pvzRepo.GetByReceptionDate(ctx, startDate, endDate, limit, (page-1)*limit)
 	if err != nil {
 		return nil, fmt.Errorf("PvzUseCase - ListByReceptionDate - uc.pvzRepo.GetByReceptionDate: %w", err)
 	}

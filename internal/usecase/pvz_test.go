@@ -129,11 +129,11 @@ func TestPvzUseCase_ListByReceptionDate(t *testing.T) {
 			input: listTestInput{
 				startDate: &startDate1,
 				endDate:   &endDate1,
-				page:      0,
-				limit:     2,
+				page:      1,
+				limit:     10,
 			},
 			mock: func() {
-				repo.EXPECT().GetByReceptionDate(ctx, &startDate1, &endDate1, 2, 0).
+				repo.EXPECT().GetByReceptionDate(ctx, &startDate1, &endDate1, 10, 0).
 					Return([]entity.Pvz{pvz1, pvz2}, nil)
 			},
 			res: []entity.Pvz{pvz1, pvz2},
@@ -145,10 +145,10 @@ func TestPvzUseCase_ListByReceptionDate(t *testing.T) {
 				startDate: &startDate2,
 				endDate:   &endDate2,
 				page:      1,
-				limit:     2,
+				limit:     10,
 			},
 			mock: func() {
-				repo.EXPECT().GetByReceptionDate(ctx, &startDate2, &endDate2, 2, 2).
+				repo.EXPECT().GetByReceptionDate(ctx, &startDate2, &endDate2, 10, 0).
 					Return(nil, errInternalServErr)
 			},
 			res: nil,
@@ -159,11 +159,11 @@ func TestPvzUseCase_ListByReceptionDate(t *testing.T) {
 			input: listTestInput{
 				startDate: nil,
 				endDate:   nil,
-				page:      0,
-				limit:     1,
+				page:      1,
+				limit:     10,
 			},
 			mock: func() {
-				repo.EXPECT().GetByReceptionDate(ctx, (*time.Time)(nil), (*time.Time)(nil), 1, 0).
+				repo.EXPECT().GetByReceptionDate(ctx, (*time.Time)(nil), (*time.Time)(nil), 10, 0).
 					Return([]entity.Pvz{pvz1}, nil)
 
 			},

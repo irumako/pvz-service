@@ -30,16 +30,99 @@ func NewPvzRoutes(
 
 	routes := apiV1.Group("/pvz")
 	{
-		routes.GET("/", r.getFilterList)
+		routes.GET("/", middleware.Role(entity.Moderator, entity.Employee), r.getFilterList)
 
 		routes.POST("/", middleware.Role(entity.Moderator), r.create)
-		routes.POST("/:id/close_last_reception", r.closeLastReception)
+		routes.POST("/:id/close_last_reception", middleware.Role(entity.Employee), r.closeLastReception)
 		routes.POST("/:id/delete_last_product", middleware.Role(entity.Employee), r.deleteLastProduct)
 	}
 }
 
 func (r *pvzRoutes) getFilterList(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, gin.H{"msg": "success"})
+	params := generated.GetPvzParams{}
+	if err := ctx.ShouldBindQuery(&params); err != nil {
+		ctx.JSON(http.StatusBadRequest, generated.Error{Message: err.Error()})
+		return
+	}
+
+	if params.Page == nil || *params.Page < 1 {
+		defaultPage := 1
+		params.Page = &defaultPage
+	}
+
+	if params.Limit == nil || *params.Limit < 0 {
+		defaultLimit := 10
+		params.Limit = &defaultLimit
+	}
+
+	if params.StartDate != nil {
+		if params.StartDate.IsZero() {
+			params.StartDate = nil
+		}
+	}
+
+	if params.EndDate != nil {
+		if params.EndDate.IsZero() {
+			params.EndDate = nil
+		}
+	}
+
+	r.l.Info("params value", params)
+
+	pvzList, err := r.pvzUC.ListByReceptionDate(
+		ctx.Request.Context(),
+		params.StartDate,
+		params.EndDate,
+		*params.Page,
+		*params.Limit,
+	)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, generated.Error{Message: err.Error()})
+		return
+	}
+
+	type receptionResponse struct {
+		Reception entity.Reception `json:"reception"`
+		Products  []entity.Product `json:"products"`
+	}
+
+	type pvzResponse struct {
+		Pvz        entity.Pvz          `json:"pvz"`
+		Receptions []receptionResponse `json:"receptions"`
+	}
+
+	response := make([]pvzResponse, 0)
+
+	for _, pvz := range pvzList {
+		receptions, err := r.receptionUC.GetByPvzId(ctx.Request.Context(), pvz.ID)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, generated.Error{Message: err.Error()})
+			return
+		}
+
+		receptionsResp := make([]receptionResponse, 0)
+
+		for _, rec := range receptions {
+			products, err := r.productUC.GetByReceptionId(ctx.Request.Context(), rec.ID)
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, generated.Error{Message: err.Error()})
+				return
+			}
+
+			receptionsResp = append(receptionsResp, receptionResponse{
+				Reception: rec,
+				Products:  products,
+			})
+		}
+
+		response = append(response, pvzResponse{
+			Pvz:        pvz,
+			Receptions: receptionsResp,
+		})
+
+	}
+
+	ctx.JSON(http.StatusOK, response)
 }
 
 func (r *pvzRoutes) create(ctx *gin.Context) {
