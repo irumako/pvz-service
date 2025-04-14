@@ -21,6 +21,7 @@ type (
 	}
 	ProductRepo interface {
 		GetByReceptionId(ctx context.Context, receptionId string) ([]entity.Product, error)
+		GetLastInReception(ctx context.Context, receptionId string) (*entity.Product, error)
 		Create(ctx context.Context, receptionId string, productType entity.ProductType) (*entity.Product, error)
 		Delete(ctx context.Context, id string) error
 	}

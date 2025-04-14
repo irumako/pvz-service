@@ -2,8 +2,11 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	trmpgx "github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2"
+	"github.com/jackc/pgx/v5/pgconn"
 	"pvz-service/internal/entity"
 	"pvz-service/pkg/postgres"
 )
@@ -36,6 +39,9 @@ func (r *ReceptionRepo) GetById(ctx context.Context, id string) (*entity.Recepti
 
 	err = conn.QueryRow(ctx, query, args...).Scan(&reception.Datetime, &reception.PvzID, &reception.Status)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrRecordNotFound
+		}
 		return nil, fmt.Errorf("ReceptionRepo - GetById - conn.QueryRow: %w", err)
 	}
 
@@ -87,7 +93,8 @@ func (r *ReceptionRepo) GetByPvzIdWithStatus(
 		Select("r.id", "r.datetime").
 		From("reception r").
 		Where("r.pvz_id = ?", pvzId).
-		Where("r.status = ?", status)
+		Where("r.status = ?", status).
+		Suffix(getForUpdateClause(ctx))
 
 	query, args, err := builder.ToSql()
 	if err != nil {
@@ -122,9 +129,9 @@ func (r *ReceptionRepo) Create(ctx context.Context, pvzId string) (*entity.Recep
 	conn := r.getter.DefaultTrOrDB(ctx, r.db.Pool)
 	builder := r.db.Builder.
 		Insert("reception").
-		Columns("pvz_id").
-		Values(pvzId).
-		Suffix("RETURNING id, datetime, status")
+		Columns("pvz_id, status").
+		Values(pvzId, entity.InProgress).
+		Suffix("RETURNING id, datetime")
 
 	query, args, err := builder.ToSql()
 	if err != nil {
@@ -133,9 +140,14 @@ func (r *ReceptionRepo) Create(ctx context.Context, pvzId string) (*entity.Recep
 
 	reception := entity.Reception{}
 	reception.PvzID = pvzId
+	reception.Status = entity.InProgress
 
-	err = conn.QueryRow(ctx, query, args...).Scan(&reception.ID, &reception.Datetime, &reception.Status)
+	err = conn.QueryRow(ctx, query, args...).Scan(&reception.ID, &reception.Datetime)
 	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			return nil, ErrDuplicateKey
+		}
 		return nil, fmt.Errorf("ReceptionRepo - Create - conn.QueryRow: %w", err)
 	}
 

@@ -2,6 +2,8 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	trmpgx "github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2"
 	"pvz-service/internal/entity"
@@ -35,8 +37,11 @@ func (r *PvzRepo) GetById(ctx context.Context, id string) (*entity.Pvz, error) {
 
 	pvz := entity.Pvz{}
 
-	err = conn.QueryRow(ctx, query, args...).Scan(&pvz.ID, &pvz.RegistrationDate)
+	err = conn.QueryRow(ctx, query, args...).Scan(&pvz.ID, &pvz.RegistrationDate, &pvz.City)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrRecordNotFound
+		}
 		return nil, fmt.Errorf("PvzRepo - GetById - conn.QueryRow: %w", err)
 	}
 
