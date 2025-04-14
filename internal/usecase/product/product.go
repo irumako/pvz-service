@@ -24,6 +24,15 @@ func New(productRepo repo.ProductRepo, receptionRepo repo.ReceptionRepo, trm trm
 	}
 }
 
+func (uc *UseCase) GetByReceptionId(ctx context.Context, receptionId string) ([]entity.Product, error) {
+	products, err := uc.productRepo.GetByReceptionId(ctx, receptionId)
+	if err != nil {
+		return nil, fmt.Errorf("ReceptionUseCase - GetByPvzId - uc.receptionRepo.GetByPvzId: %w", err)
+	}
+
+	return products, nil
+}
+
 func (uc *UseCase) Create(ctx context.Context, pvzId string, productType entity.ProductType) (*entity.Product, error) {
 
 	product := &entity.Product{}

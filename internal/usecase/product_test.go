@@ -21,6 +21,77 @@ func productUseCase(t *testing.T) (*product.UseCase, *MockProductRepo, *MockRece
 	return uc, productRepo, receptionRepo
 }
 
+func TestProductUseCase_GetByReceptionId(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	pvzId := "pvz-uuid4"
+	fixedTime, err := time.Parse(time.DateOnly, "2002-06-21")
+	require.NoError(t, err)
+
+	productType := entity.Electronic
+	openReception := entity.Reception{
+		ID:       "rec-001",
+		PvzID:    pvzId,
+		Datetime: fixedTime,
+		Status:   entity.InProgress,
+	}
+	productsExpected := []entity.Product{
+		{
+			ID:          "prod-001",
+			ReceptionID: openReception.ID,
+			Datetime:    fixedTime,
+			Type:        productType,
+		},
+		{
+			ID:          "prod-002",
+			ReceptionID: openReception.ID,
+			Datetime:    fixedTime,
+			Type:        productType,
+		},
+	}
+
+	tests := []struct {
+		name string
+		mock func(productRepo *MockProductRepo, recRepo *MockReceptionRepo)
+		res  []entity.Product
+		err  error
+	}{
+		{
+			name: "Успешное получение товаров",
+			mock: func(productRepo *MockProductRepo, recRepo *MockReceptionRepo) {
+
+				productRepo.EXPECT().GetByReceptionId(ctx, openReception.ID).Return(productsExpected, nil)
+			},
+			res: productsExpected,
+			err: nil,
+		},
+		{
+			name: "Ошибка в репо",
+			mock: func(productRepo *MockProductRepo, recRepo *MockReceptionRepo) {
+				productRepo.EXPECT().GetByReceptionId(ctx, openReception.ID).Return(nil, entity.ErrInternalServErr)
+			},
+			res: nil,
+			err: entity.ErrInternalServErr,
+		},
+	}
+
+	for _, tc := range tests {
+		localTc := tc
+
+		t.Run(localTc.name, func(t *testing.T) {
+			uc, productRepo, receptionRepo := productUseCase(t)
+
+			localTc.mock(productRepo, receptionRepo)
+
+			res, err := uc.GetByReceptionId(ctx, openReception.ID)
+
+			require.Equal(t, localTc.res, res)
+			require.ErrorIs(t, err, localTc.err)
+		})
+	}
+}
+
 func TestProductUseCase_Create(t *testing.T) {
 	t.Parallel()
 

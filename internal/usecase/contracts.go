@@ -17,6 +17,7 @@ type (
 		CloseLastOpenOnPvz(ctx context.Context, pvzId string) (*entity.Reception, error)
 	}
 	Product interface {
+		GetByReceptionId(ctx context.Context, receptionId string) ([]entity.Product, error)
 		Create(ctx context.Context, pvzId string, productType entity.ProductType) (*entity.Product, error)
 		Delete(ctx context.Context, pvzId string) error
 	}
